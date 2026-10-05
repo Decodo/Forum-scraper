@@ -51,7 +51,7 @@ export class DecodoService {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Basic ${decodoApiKey}`,
-        'x-integration': 'reddit_tracker',
+        'x-integration': 'oss-reddit-tracker',
       },
       body: JSON.stringify({
         target: request.target,
