@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, ServiceUnavailableException } from '@nestjs/common';
+import { ServiceUnavailableException } from '@nestjs/common';
 import { DecodoService } from './decodo.service';
 import { SettingsService } from '../settings/settings.service';
 import type { EffectiveConfig } from '../settings/settings.service';
@@ -20,7 +20,7 @@ function makeConfig(overrides: Partial<EffectiveConfig> = {}): EffectiveConfig {
   };
 }
 
-/** Build a mock fetch Response that mimics Decodo v2 shape */
+/** Build a mock fetch Response with Decodo's scraping response shape. */
 function makeDecodoFetch(content: unknown, status_code = 200): Response {
   return {
     ok: true,
@@ -87,13 +87,15 @@ describe('DecodoService', () => {
   // ---------------------------------------------------------------------------
 
   describe('scrape()', () => {
-    it('sends Authorization: Basic ${apiKey} header', async () => {
+    it('sends Web Data API Bearer authorization to the new endpoint', async () => {
       fetchSpy.mockResolvedValue(makeDecodoFetch('{"data":{"children":[]}}', 200));
 
       await service.scrape({ target: 'universal', url: 'https://reddit.com' });
 
       const headers = (fetchSpy.mock.calls[0][1] as RequestInit).headers as Record<string, string>;
-      expect(headers['Authorization']).toBe('Basic test-decodo-key');
+      expect(headers['Authorization']).toBe('Bearer test-decodo-key');
+      expect(fetchSpy.mock.calls[0][0]).toBe('https://data.decodo.com/v1/scrape');
+      expect(headers['x-integration']).toBe('oss-reddit-tracker');
     });
 
     it('defaults locale to "en" in the request body', async () => {
@@ -105,12 +107,13 @@ describe('DecodoService', () => {
       expect(body.locale).toBe('en');
     });
 
-    it('throws BadRequestException when decodoApiKey is empty', async () => {
+    it('explains the required Web Data API key when decodoApiKey is empty', async () => {
       settingsService.getEffectiveConfig.mockResolvedValue(makeConfig({ decodoApiKey: '' }));
 
       await expect(
         service.scrape({ target: 'universal', url: 'https://reddit.com' }),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow('DECODO_API_KEY is not configured');
+      expect(fetchSpy).not.toHaveBeenCalled();
     });
 
     it('throws HttpException with status 429 when upstream returns 429', async () => {

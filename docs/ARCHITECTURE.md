@@ -32,7 +32,7 @@ Decodo Forum Scraper is a monorepo with a React frontend, NestJS backend, and sh
 ```
 
 External APIs:
-- **Decodo Scraping API** — `https://scraper-api.decodo.com/v2/scrape`
+- **Decodo Web Data API** — `https://data.decodo.com/v1/scrape` (Bearer API key)
 - **Anthropic API** — default LLM provider
 - **OpenAI API** — optional LLM provider
 - **Google Gemini API** — optional LLM provider
@@ -53,7 +53,7 @@ External APIs:
 2. `TrackerService.analyzePlan()`:
    a. **Parallel search** — site-wide Reddit search queries via `universal` target (no subreddit hot-feed scraping)
    b. **Dedup & rank** — keep only on-topic posts (topic terms from queries + proper nouns), sort by relevance × upvotes, cap at 30
-   c. **Deep dive** — fetch full comment threads for top 8 posts via `reddit_post` target (concurrent)
+   c. **Deep dive** — fetch full comment threads for top 8 posts via Reddit `.json` endpoints with the `universal` target (concurrent)
    d. **LLM summarization** — send all content to LLM with `SUMMARIZATION_PROMPT`
    e. **Persist** — save full result to MongoDB via `QueriesService`
 3. Response: `{ id, plan, posts[], report }`
@@ -66,7 +66,7 @@ External APIs:
 Orchestrates the full pipeline. No database access — delegates to `DecodoService`, `LlmService`, and `QueriesService`.
 
 ### `decodo`
-Wraps the Decodo Scraping API. Provides three typed methods:
+Wraps the Decodo Web Data API. Provides three typed methods:
 - `searchReddit(params)` — `universal` target + `headless: html`, Reddit search JSON endpoint
 - `scrapeSubreddit(params)` — `universal` target + `headless: html`, subreddit hot feed via `/hot.json`
 - `scrapePost(params)` — `universal` target + `headless: html`, full comment thread via `.json` endpoint

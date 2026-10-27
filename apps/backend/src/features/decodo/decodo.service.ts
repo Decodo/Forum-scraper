@@ -41,16 +41,16 @@ export class DecodoService {
     const { decodoApiKey } = config;
 
     if (!decodoApiKey) {
-      throw new BadRequestException('DECODO_BASIC_AUTH_TOKEN is not configured');
+      throw new BadRequestException('DECODO_API_KEY is not configured');
     }
 
     this.logger.log(`Scraping [${request.target}] ${request.url}`);
 
-    const response = await fetch('https://scraper-api.decodo.com/v2/scrape', {
+    const response = await fetch('https://data.decodo.com/v1/scrape', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Basic ${decodoApiKey}`,
+        Authorization: `Bearer ${decodoApiKey}`,
         'x-integration': 'oss-reddit-tracker',
       },
       body: JSON.stringify({
@@ -132,7 +132,7 @@ export class DecodoService {
   }
 
   // ---------------------------------------------------------------------------
-  // Target: reddit_subreddit — subreddit feed
+  // Method: scrapeSubreddit — subreddit feed (universal target)
   // ---------------------------------------------------------------------------
 
   async scrapeSubreddit(
@@ -148,7 +148,7 @@ export class DecodoService {
   }
 
   // ---------------------------------------------------------------------------
-  // Target: reddit_post — full comment thread
+  // Method: scrapePost — full comment thread (universal target)
   // ---------------------------------------------------------------------------
 
   async scrapePost(

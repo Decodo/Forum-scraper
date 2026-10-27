@@ -122,7 +122,7 @@ function SettingsPage() {
             <div className="flex items-start gap-2 rounded-md border border-yellow-300 bg-yellow-50 px-3 py-2.5 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-400">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>
-                <code className="font-mono">DECODO_BASIC_AUTH_TOKEN</code> is not set in your{' '}
+                <code className="font-mono">DECODO_API_KEY</code> is not set in your{' '}
                 <code className="font-mono">.env</code> — scraping won't work.
               </span>
             </div>
@@ -242,7 +242,7 @@ function SettingsPage() {
             isLoading={isLoading}
           />
           <KeyRow
-            label="Decodo token (DECODO_BASIC_AUTH_TOKEN)"
+            label="Decodo Web Data API key (DECODO_API_KEY)"
             isSet={status?.decodoKeySet}
             isLoading={isLoading}
           />
