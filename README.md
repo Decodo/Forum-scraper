@@ -6,12 +6,12 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 <p align="center">
-<a href="https://dashboard.decodo.com/scrapers/pricing?utm_source=github&utm_medium=social&utm_campaign=webscrapingapi"><img src="https://github.com/user-attachments/assets/13b08523-32b0-4c85-8e99-580d7c2a9055"></a>
+<a href="https://dashboard.decodo.com/web-data/pricing?utm_source=github&utm_medium=social&utm_campaign=forum-scraper"><img src="https://github.com/user-attachments/assets/233d4e4e-8f64-4179-a32e-a4b9cf78137f" alt="Decodo Web Data API" /></a>
 </p>
 
 Forum Scraper is an open-source scraping and intelligence tool that collects subreddit posts and comments from any topic or search query, then generates AI-powered reports with sentiment analysis, key themes, notable quotes, and top post rankings.
 
-Built for developers, marketers, founders, and researchers, it combines [Decodo Web Scraping API](https://decodo.com/scraping/web) with LLM-based analysis to turn raw Reddit discussions into structured, actionable insights without manual browsing.
+Built for developers, marketers, founders, and researchers, it combines [Decodo Web Data API](https://decodo.com/web-data-api) with LLM-based analysis to turn raw Reddit discussions into structured, actionable insights without manual browsing.
 
 ## Features
 
@@ -33,7 +33,7 @@ Built for developers, marketers, founders, and researchers, it combines [Decodo 
 
 3. **Review the scraping plan**. The LLM suggests relevant subreddits and search queries before scraping begins. You can review and edit the generated plan before running it.
 
-4. **Generate an intelligence report**. Reddit posts and comments are scraped through the Decodo Web Scraping API, then analyzed by the LLM to produce a structured report with summaries, themes, sentiment analysis, notable quotes, and top discussions.
+4. **Generate an intelligence report**. Reddit posts and comments are scraped through the Decodo Web Data API, then analyzed by the LLM to produce a structured report with summaries, themes, sentiment analysis, notable quotes, and top discussions.
 
 5. **Export the results**. Download the generated report as Markdown or JSON for further analysis, reporting, or sharing.
 
@@ -127,7 +127,7 @@ Built for developers, marketers, founders, and researchers, it combines [Decodo 
 
 - [Bun](https://bun.sh) version 1.2.5 or newer
 - [Docker](https://docker.com) for running local MongoDB and Redis instances
-- A Decodo Web Scraping API token – create an account at [dashboard.decodo.com](https://dashboard.decodo.com/register?page=scrapers/pricing)
+- A Decodo Web Data API token – create an account at [dashboard.decodo.com](https://dashboard.decodo.com/register)
 - At least one supported LLM provider API key:
   - Anthropic
   - OpenAI
@@ -162,7 +162,7 @@ cp .env.example .env
 ```
 
 Add your:
-- Decodo API token
+- Decodo Web Data API key
 - LLM provider selection
 - Anthropic, OpenAI, or Gemini API key
 
@@ -197,8 +197,9 @@ http://localhost:5002
 After creating your `.env` file during installation, add your API credentials and provider settings:
 
 ```env
-# Decodo Scraping API
-DECODO_BASIC_AUTH_TOKEN=your_decodo_token
+# Decodo Web Data API
+# Paste your API key without the "Bearer" prefix.
+DECODO_API_KEY=your_decodo_api_key
 
 # LLM provider (claude | openai | gemini)
 LLM_PROVIDER=claude
@@ -214,7 +215,7 @@ GEMINI_API_KEY=AIza...
 
 | Variable | Description |
 | --- | --- |
-| `DECODO_BASIC_AUTH_TOKEN` | Decodo Scraping API authentication token |
+| `DECODO_API_KEY` | Decodo Web Data API key, without the `Bearer` prefix |
 | `LLM_PROVIDER` | LLM provider to use (`claude`, `openai`, or `gemini`) |
 | `LLM_MODEL` | Optional custom model override |
 | `ANTHROPIC_API_KEY` | Anthropic API key |
@@ -237,7 +238,7 @@ GEMINI_API_KEY=AIza...
 | --- | --- |
 | Frontend | React 19, TanStack Router, TanStack Query, Tailwind CSS v4, Radix UI |
 | Backend | NestJS 11, MongoDB, Mongoose |
-| Scraping | Decodo Web Scraping API |
+| Scraping | Decodo Web Data API |
 | LLMs | Anthropic Claude, OpenAI GPT, Google Gemini |
 
 ## Project structure
@@ -265,7 +266,7 @@ apps/
     src/
       features/
         tracker/      # Scraping and report generation endpoints
-        decodo/       # Decodo Web Scraping API integration
+        decodo/       # Decodo Web Data API integration
         llm/          # Claude, OpenAI, and Gemini abstraction layer
         queries/      # Query history persistence
         settings/     # Runtime provider and API configuration
@@ -278,7 +279,7 @@ docs/
 
 ## Documentation
 
-For additional information about scraping targets, parameters, and API behavior, see the [Decodo Web Scraping API documentation](https://help.decodo.com/docs/web-scraping-api-introduction).
+For additional information about scraping targets, parameters, and API behavior, see the [Decodo Web Data API documentation](https://help.decodo.com/docs/web-data-api-introduction).
 
 ## API endpoints
 
@@ -294,20 +295,18 @@ For additional information about scraping targets, parameters, and API behavior,
 
 ## Scraping strategy
 
-Each analysis combines three Decodo scraping targets to collect Reddit data at different levels:
+Forum Scraper retrieves Reddit JSON endpoints through the Web Data API using the `universal` target:
 
-| Step | Target | Purpose |
+| Step | Reddit URL pattern | Purpose |
 | --- | --- | --- |
-| 1 | `universal` | Search Reddit globally across multiple subreddits |
-| 2 | `reddit_subreddit` | Collect trending and relevant subreddit posts |
-| 3 | `reddit_post` | Extract full comment threads for deeper analysis |
+| 1 | `/search.json` | Search Reddit for relevant posts across subreddits |
+| 2 | `/r/{subreddit}/comments/{postId}.json` | Retrieve comment threads for the top-ranked posts |
 
-The LLM generates relevant subreddits and search queries based on the user's prompt. Up to 30 posts are collected, deduplicated, and ranked by engagement before the top results are scraped with full comment threads for AI-powered analysis and summarization.
+The LLM suggests subreddits and search queries based on the user's prompt. The analysis currently performs site-wide search queries, then collects up to 30 posts, deduplicates and ranks them for relevance, and retrieves full comment threads for up to 8 top posts before LLM summarization. The code also provides a subreddit hot-feed method, but the main analysis workflow does not call it.
 
 ## Related repositories
 
-- [Decodo Web Scraping API](https://github.com/Decodo/Web-Scraping-API)
-- [Decodo Web Scraping API documentation](https://help.decodo.com/docs/web-scraping-api-introduction)
+- [Decodo Web Data API documentation](https://help.decodo.com/docs/web-data-api-introduction)
 - [Decodo Stack Overflow Trends Monitor](https://github.com/Decodo/stackoverflow-trends-monitor)
 - [Decodo GitHub Research](https://github.com/Decodo/github-research)
 - [Decodo SDK for TypeScript](https://github.com/Decodo/sdk-ts)

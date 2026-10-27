@@ -29,8 +29,8 @@ export class ConfigService {
 
   get decodo() {
     return {
-      apiKey: this.configService.get<string>('DECODO_BASIC_AUTH_TOKEN', ''),
-      baseUrl: 'https://scraper-api.decodo.com/v2',
+      apiKey: this.configService.get<string>('DECODO_API_KEY', ''),
+      baseUrl: 'https://data.decodo.com/v1',
     };
   }
 
